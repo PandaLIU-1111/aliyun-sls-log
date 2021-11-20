@@ -15,15 +15,18 @@ use Hyperf\AliyunSlsLog\Exception\AliYunLogException;
 use Hyperf\AliyunSlsLog\Request\ApplyConfigToMachineGroupRequest;
 use Hyperf\AliyunSlsLog\Request\BatchGetLogsRequest;
 use Hyperf\AliyunSlsLog\Request\CreateACLRequest;
+use Hyperf\AliyunSlsLog\Request\CreateConfigRequest;
 use Hyperf\AliyunSlsLog\Request\CreateLogstoreRequest;
 use Hyperf\AliyunSlsLog\Request\CreateMachineGroupRequest;
 use Hyperf\AliyunSlsLog\Request\CreateShipperRequest;
 use Hyperf\AliyunSlsLog\Request\DeleteACLRequest;
+use Hyperf\AliyunSlsLog\Request\DeleteConfigRequest;
 use Hyperf\AliyunSlsLog\Request\DeleteLogstoreRequest;
 use Hyperf\AliyunSlsLog\Request\DeleteMachineGroupRequest;
 use Hyperf\AliyunSlsLog\Request\DeleteShardRequest;
 use Hyperf\AliyunSlsLog\Request\DeleteShipperRequest;
 use Hyperf\AliyunSlsLog\Request\GetACLRequest;
+use Hyperf\AliyunSlsLog\Request\GetConfigRequest;
 use Hyperf\AliyunSlsLog\Request\GetCursorRequest;
 use Hyperf\AliyunSlsLog\Request\GetHistogramsRequest;
 use Hyperf\AliyunSlsLog\Request\GetLogsRequest;
@@ -47,12 +50,14 @@ use Hyperf\AliyunSlsLog\Request\RemoveConfigFromMachineGroupRequest;
 use Hyperf\AliyunSlsLog\Request\RetryShipperTasksRequest;
 use Hyperf\AliyunSlsLog\Request\SplitShardRequest;
 use Hyperf\AliyunSlsLog\Request\UpdateACLRequest;
+use Hyperf\AliyunSlsLog\Request\UpdateConfigRequest;
 use Hyperf\AliyunSlsLog\Request\UpdateLogstoreRequest;
 use Hyperf\AliyunSlsLog\Request\UpdateMachineGroupRequest;
 use Hyperf\AliyunSlsLog\Request\UpdateShipperRequest;
 use Hyperf\AliyunSlsLog\Response\ApplyConfigToMachineGroupResponse;
 use Hyperf\AliyunSlsLog\Response\BatchGetLogsResponse;
 use Hyperf\AliyunSlsLog\Response\CreateACLResponse;
+use Hyperf\AliyunSlsLog\Response\CreateConfigResponse;
 use Hyperf\AliyunSlsLog\Response\CreateLogstoreResponse;
 use Hyperf\AliyunSlsLog\Response\CreateMachineGroupResponse;
 use Hyperf\AliyunSlsLog\Response\CreateShipperResponse;
@@ -64,6 +69,7 @@ use Hyperf\AliyunSlsLog\Response\DeleteMachineGroupResponse;
 use Hyperf\AliyunSlsLog\Response\DeleteShardResponse;
 use Hyperf\AliyunSlsLog\Response\DeleteShipperResponse;
 use Hyperf\AliyunSlsLog\Response\GetACLResponse;
+use Hyperf\AliyunSlsLog\Response\GetConfigResponse;
 use Hyperf\AliyunSlsLog\Response\GetCursorResponse;
 use Hyperf\AliyunSlsLog\Response\GetHistogramsResponse;
 use Hyperf\AliyunSlsLog\Response\GetLogsResponse;
@@ -85,6 +91,7 @@ use Hyperf\AliyunSlsLog\Response\PutLogsResponse;
 use Hyperf\AliyunSlsLog\Response\RemoveConfigFromMachineGroupResponse;
 use Hyperf\AliyunSlsLog\Response\RetryShipperTasksResponse;
 use Hyperf\AliyunSlsLog\Response\UpdateACLResponse;
+use Hyperf\AliyunSlsLog\Response\UpdateConfigResponse;
 use Hyperf\AliyunSlsLog\Response\UpdateLogstoreResponse;
 use Hyperf\AliyunSlsLog\Response\UpdateMachineGroupResponse;
 use Hyperf\AliyunSlsLog\Response\UpdateShipperResponse;
@@ -486,7 +493,7 @@ class Client
         $logstore = $request->getLogstore() != null ? $request->getLogstore() : '';
         $resource = "/logstores/{$logstore}";
         [$resp, $header] = $this->send('DELETE', $project, null, $resource, $params, $headers);
-        $requestId = isset($header['x-log-requestid']) ? $header['x-log-requestid'] : '';
+        $requestId = $header['x-log-requestid'] ?? '';
         $resp = $this->parseToJson($resp, $requestId);
         return new DeleteLogstoreResponse($resp, $header);
     }
@@ -511,7 +518,7 @@ class Client
         $project = $request->getProject() !== null ? $request->getProject() : '';
         $resource = "/logstores/{$logstore}";
         [$resp, $header] = $this->send('GET', $project, null, $resource, $params, $headers);
-        $requestId = isset($header['x-log-requestid']) ? $header['x-log-requestid'] : '';
+        $requestId = $header['x-log-requestid'] ?? '';
         $resp = $this->parseToJson($resp, $requestId);
         return new ListTopicsResponse($resp, $header);
     }
@@ -545,7 +552,7 @@ class Client
         $project = $request->getProject() !== null ? $request->getProject() : '';
         $resource = "/logstores/{$logstore}";
         [$resp, $header] = $this->send('GET', $project, null, $resource, $params, $headers);
-        $requestId = isset($header['x-log-requestid']) ? $header['x-log-requestid'] : '';
+        $requestId = $header['x-log-requestid'] ?? '';
         $resp = $this->parseToJson($resp, $requestId);
         return [$resp, $header];
     }
@@ -607,7 +614,7 @@ class Client
         $project = $request->getProject() !== null ? $request->getProject() : '';
         $resource = "/logstores/{$logstore}";
         [$resp, $header] = $this->send('GET', $project, null, $resource, $params, $headers);
-        $requestId = isset($header['x-log-requestid']) ? $header['x-log-requestid'] : '';
+        $requestId = $header['x-log-requestid'] ?? '';
         $resp = $this->parseToJson($resp, $requestId);
         return [$resp, $header];
     }
@@ -649,7 +656,7 @@ class Client
         $project = $request->getProject() !== null ? $request->getProject() : '';
         $resource = '/logs';
         [$resp, $header] = $this->send('GET', $project, null, $resource, $params, $headers);
-        $requestId = isset($header['x-log-requestid']) ? $header['x-log-requestid'] : '';
+        $requestId = $header['x-log-requestid'] ?? '';
         $resp = $this->parseToJson($resp, $requestId);
         return [$resp, $header];
         //return new GetLogsResponse ( $resp, $header );
@@ -699,7 +706,7 @@ class Client
         $project = $request->getProject() !== null ? $request->getProject() : '';
         $resource = "/logstores/{$logstore}";
         [$resp, $header] = $this->send('GET', $project, null, $resource, $params, $headers);
-        $requestId = isset($header['x-log-requestid']) ? $header['x-log-requestid'] : '';
+        $requestId = $header['x-log-requestid'] ?? '';
         $resp = $this->parseToJson($resp, $requestId);
         return new LogStoreSqlResponse($resp, $header);
     }
@@ -725,7 +732,7 @@ class Client
         $project = $request->getProject() !== null ? $request->getProject() : '';
         $resource = '/logs';
         [$resp, $header] = $this->send('GET', $project, null, $resource, $params, $headers);
-        $requestId = isset($header['x-log-requestid']) ? $header['x-log-requestid'] : '';
+        $requestId = $header['x-log-requestid'] ?? '';
         $resp = $this->parseToJson($resp, $requestId);
         return [$resp, $header];
         //return new GetLogsResponse ( $resp, $header );
@@ -767,8 +774,7 @@ class Client
         ];
         $body_str = json_encode($body);
         [$resp, $header] = $this->send('POST', $project, $body_str, $resource, $params, $headers);
-        $requestId = isset($header['x-log-requestid']) ?
-            $header['x-log-requestid'] : '';
+        $requestId = $header['x-log-requestid'] ?? '';
         $resp = $this->parseToJson($resp, $requestId);
         return new CreateSqlInstanceResponse($resp, $header);
     }
@@ -793,8 +799,7 @@ class Client
         ];
         $body_str = json_encode($body);
         [$resp, $header] = $this->send('PUT', $project, $body_str, $resource, $params, $headers);
-        $requestId = isset($header['x-log-requestid']) ?
-            $header['x-log-requestid'] : '';
+        $requestId = $header['x-log-requestid'] ?? '';
         $resp = $this->parseToJson($resp, $requestId);
         return new UpdateSqlInstanceResponse($resp, $header);
     }
@@ -878,7 +883,7 @@ class Client
 
         $resource = '/logstores/' . $logstore . '/shards';
         [$resp, $header] = $this->send('GET', $project, null, $resource, $params, $headers);
-        $requestId = isset($header['x-log-requestid']) ? $header['x-log-requestid'] : '';
+        $requestId = $header['x-log-requestid'] ?? '';
         $resp = $this->parseToJson($resp, $requestId);
         return new ListShardsResponse($resp, $header);
     }
@@ -904,7 +909,7 @@ class Client
         $params['action'] = 'split';
         $params['key'] = $midHash;
         [$resp, $header] = $this->send('POST', $project, null, $resource, $params, $headers);
-        $requestId = isset($header['x-log-requestid']) ? $header['x-log-requestid'] : '';
+        $requestId = $header['x-log-requestid'] ?? '';
         $resp = $this->parseToJson($resp, $requestId);
         return new ListShardsResponse($resp, $header);
     }
@@ -928,7 +933,7 @@ class Client
         $resource = '/logstores/' . $logstore . '/shards/' . $shardId;
         $params['action'] = 'merge';
         [$resp, $header] = $this->send('POST', $project, null, $resource, $params, $headers);
-        $requestId = isset($header['x-log-requestid']) ? $header['x-log-requestid'] : '';
+        $requestId = $header['x-log-requestid'] ?? '';
         $resp = $this->parseToJson($resp, $requestId);
         return new ListShardsResponse($resp, $header);
     }
@@ -951,7 +956,7 @@ class Client
 
         $resource = '/logstores/' . $logstore . '/shards/' . $shardId;
         [$resp, $header] = $this->send('DELETE', $project, null, $resource, $params, $headers);
-        $requestId = isset($header['x-log-requestid']) ? $header['x-log-requestid'] : '';
+        $requestId = $header['x-log-requestid'] ?? '';
         return new DeleteShardResponse($header);
     }
 
@@ -993,7 +998,7 @@ class Client
         }
         $resource = '/logstores/' . $logstore . '/shards/' . $shardId;
         [$resp, $header] = $this->send('GET', $project, null, $resource, $params, $headers);
-        $requestId = isset($header['x-log-requestid']) ? $header['x-log-requestid'] : '';
+        $requestId = $header['x-log-requestid'] ?? '';
         $resp = $this->parseToJson($resp, $requestId);
         return new GetCursorResponse($resp, $header);
     }
@@ -1037,7 +1042,7 @@ class Client
 
         $resource = '/configs/' . $configName;
         [$resp, $header] = $this->send('GET', null, null, $resource, $params, $headers);
-        $requestId = isset($header['x-log-requestid']) ? $header['x-log-requestid'] : '';
+        $requestId = $header['x-log-requestid'] ?? '';
         $resp = $this->parseToJson($resp, $requestId);
         return new GetConfigResponse($resp, $header);
     }
@@ -1069,7 +1074,7 @@ class Client
 
         $resource = '/configs';
         [$resp, $header] = $this->send('GET', null, null, $resource, $params, $headers);
-        $requestId = isset($header['x-log-requestid']) ? $header['x-log-requestid'] : '';
+        $requestId = $header['x-log-requestid'] ?? '';
         $resp = $this->parseToJson($resp, $requestId);
         return new ListConfigsResponse($resp, $header);
     }
@@ -1114,7 +1119,7 @@ class Client
 
         $resource = '/machinegroups/' . $groupName;
         [$resp, $header] = $this->send('GET', null, null, $resource, $params, $headers);
-        $requestId = isset($header['x-log-requestid']) ? $header['x-log-requestid'] : '';
+        $requestId = $header['x-log-requestid'] ?? '';
         $resp = $this->parseToJson($resp, $requestId);
         return new GetMachineGroupResponse($resp, $header);
     }
@@ -1147,7 +1152,7 @@ class Client
 
         $resource = '/machinegroups';
         [$resp, $header] = $this->send('GET', null, null, $resource, $params, $headers);
-        $requestId = isset($header['x-log-requestid']) ? $header['x-log-requestid'] : '';
+        $requestId = $header['x-log-requestid'] ?? '';
         $resp = $this->parseToJson($resp, $requestId);
 
         return new ListMachineGroupsResponse($resp, $header);
@@ -1186,7 +1191,7 @@ class Client
 
         $resource = '/machines/' . $uuid;
         [$resp, $header] = $this->send('GET', null, null, $resource, $params, $headers);
-        $requestId = isset($header['x-log-requestid']) ? $header['x-log-requestid'] : '';
+        $requestId = $header['x-log-requestid'] ?? '';
         $resp = $this->parseToJson($resp, $requestId);
         return new GetMachineResponse($resp, $header);
     }
@@ -1202,7 +1207,7 @@ class Client
         $headers['Content-Type'] = 'application/json';
         $resource = '/acls';
         [$resp, $header] = $this->send('POST', null, $body, $resource, $params, $headers);
-        $requestId = isset($header['x-log-requestid']) ? $header['x-log-requestid'] : '';
+        $requestId = $header['x-log-requestid'] ?? '';
         $resp = $this->parseToJson($resp, $requestId);
         return new CreateACLResponse($resp, $header);
     }
@@ -1232,7 +1237,7 @@ class Client
 
         $resource = '/acls/' . $aclId;
         [$resp, $header] = $this->send('GET', null, null, $resource, $params, $headers);
-        $requestId = isset($header['x-log-requestid']) ? $header['x-log-requestid'] : '';
+        $requestId = $header['x-log-requestid'] ?? '';
         $resp = $this->parseToJson($resp, $requestId);
 
         return new GetACLResponse($resp, $header);
@@ -1264,7 +1269,7 @@ class Client
 
         $resource = '/acls';
         [$resp, $header] = $this->send('GET', null, null, $resource, $params, $headers);
-        $requestId = isset($header['x-log-requestid']) ? $header['x-log-requestid'] : '';
+        $requestId = $header['x-log-requestid'] ?? '';
         $resp = $this->parseToJson($resp, $requestId);
         return new ListACLsResponse($resp, $header);
     }
@@ -1299,32 +1304,6 @@ class Client
             throw new AliYunLogException('BadResponse' . "Bad format,not json: {$resBody}" . $requestId);
         }
         return $result;
-    }
-
-    /**
-     * @param mixed $method
-     * @param mixed $url
-     * @param mixed $body
-     * @param mixed $headers
-     * @return array
-     */
-    protected function getHttpResponse($method, $url, $body, $headers)
-    {
-        $request = new RequestCore($url);
-        foreach ($headers as $key => $value) {
-            $request->add_header($key, $value);
-        }
-        $request->set_method($method);
-        $request->set_useragent(self::USER_AGENT);
-        if ($method == 'POST' || $method == 'PUT') {
-            $request->set_body($body);
-        }
-        $request->send_request();
-        $response = [];
-        $response[] = (int) $request->get_response_code();
-        $response[] = $request->get_response_header();
-        $response[] = $request->get_response_body();
-        return $response;
     }
 
     private function setEndpoint($endpoint)
@@ -1364,8 +1343,7 @@ class Client
             'headers' => $headers,
             'body' => $body,
         ]);
-        $content =  $response->getBody()->getContents();
-        return [$content, $response->getHeaders()];
+        return [$response->getBody()->getContents(), $response->getHeaders()];
     }
 
     /**
